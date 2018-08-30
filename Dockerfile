@@ -1,19 +1,17 @@
 FROM ubuntu:xenial
 
-LABEL "Maintainer Chris Mosetick <cmosetick@gmail.com>"
-
-ARG github_token
+ARG github_token=bd97ebf76f15a5e21c77643e92acf19690e2564a
 
 RUN \
-sed -i 's@http://archive.ubuntu.com/ubuntu/@http://ubuntu.osuosl.org/ubuntu@g' /etc/apt/sources.list && \
-apt-get update && \
-apt-get -y install software-properties-common wget curl jq git iptables ca-certificates apparmor && \
-add-apt-repository ppa:webupd8team/java -y && \
-apt-get update
+    sed -i 's@http://archive.ubuntu.com/ubuntu/@http://ubuntu.osuosl.org/ubuntu@g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get -y install software-properties-common wget curl jq git iptables ca-certificates apparmor && \
+    add-apt-repository ppa:webupd8team/java -y && \
+    apt-get update
 
 RUN \
-(echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections) && \
-apt-get install -y oracle-java8-installer oracle-java8-set-default
+    (echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections) && \
+    apt-get install -y oracle-java8-installer oracle-java8-set-default
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ENV PATH $JAVA_HOME/bin:$PATH
@@ -22,8 +20,8 @@ ENV HOME /home/jenkins-slave
 
 
 RUN \
-useradd -c "Jenkins Slave user" -d $HOME -m jenkins-slave && \
-curl --create-dirs -sSLo $HOME/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar
+    useradd -c "Jenkins Slave user" -d $HOME -m jenkins-slave && \
+    curl --create-dirs -sSLo $HOME/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar
 COPY cmd.sh /cmd.sh
 
 # setup our local files first
@@ -37,16 +35,16 @@ COPY rancher-cli-download.sh /usr/local/bin/rancher-cli-download.sh
 # now we install docker in docker - thanks to https://github.com/jpetazzo/dind
 # We install newest docker into our docker in docker container
 RUN \
-curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz && \
-tar --strip-components=1 -xvzf docker-latest.tgz -C /usr/local/bin && \
-chmod +x /usr/local/bin/docker
+    curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz && \
+    tar --strip-components=1 -xvzf docker-latest.tgz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/docker
 
 RUN \
-/usr/local/bin/rancher-cli-download.sh && \
-tar xvf rancher-linux-amd64* && \
-cp rancher-v*/rancher /usr/local/bin && \
-chmod +x /usr/local/bin/rancher && \
-rm -rf /var/cache/apt/*
+    /usr/local/bin/rancher-cli-download.sh && \
+    tar xvf rancher-linux-amd64* && \
+    cp rancher-v*/rancher /usr/local/bin && \
+    chmod +x /usr/local/bin/rancher && \
+    rm -rf /var/cache/apt/*
 
 VOLUME /var/lib/docker
 
